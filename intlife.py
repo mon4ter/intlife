@@ -1,6 +1,4 @@
 
-from itertools import chain, product
-
 
 DEFAULT_SIZE = 8
 
@@ -11,7 +9,7 @@ class IntLife:
         self.generations = generations
         self.size = size
 
-        self._neigh = {(i, j) for i, j in product(range(-1, 2), repeat=2)}
+        self._neigh = {(i, j) for i in range(-1, 2) for j in range(-1, 2)}
         self._cells = None
         self.cells()
         self._board = {self._cells[i] for i, b in enumerate(reversed(bin(self.seed)[2:])) if int(b)}
@@ -87,7 +85,7 @@ class IntLife:
         board = self._board
         new_board = set()
 
-        for point in chain.from_iterable(map(self.neighbours, board)):
+        for point in (n for p in board for n in self.neighbours(p)):
             alive_neigh = sum(1 for neigh in self.neighbours(point) if neigh in board)
 
             if alive_neigh == 3 or (alive_neigh == 4 and point in board):

@@ -1,5 +1,4 @@
 
-from itertools import repeat, count
 from random import randrange
 
 import pytest
@@ -7,7 +6,7 @@ import pytest
 import intlife
 
 
-@pytest.mark.parametrize("number", map(randrange, repeat(2**64, times=10)))
+@pytest.mark.parametrize("number", (randrange(2**64) for _ in range(10)))
 def test_conversion(number):
     assert intlife.intify(intlife.boardify(number)) == number
 
@@ -48,7 +47,7 @@ GLIDER = [
 ]
 
 
-@pytest.mark.parametrize("seed,number,generations", zip(repeat(GLIDER[-1]), GLIDER, count(1)))
+@pytest.mark.parametrize("seed,number,generations", ((GLIDER[-1], n, i + 1) for i, n in enumerate(GLIDER)))
 def test_glider(seed, number, generations):
     result = None
 
@@ -61,5 +60,5 @@ def test_glider(seed, number, generations):
 def test_iterator():
     iterator = intlife.intlife(15)
 
-    for index in range(100):
+    for _ in range(100):
         assert next(iterator) == 15
