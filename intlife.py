@@ -28,10 +28,6 @@ class IntLife:
                 yield self.int
                 count += 1
 
-    def __next__(self):
-        self.advance()
-        return self.int
-
     @property
     def board(self):
         return self._board
