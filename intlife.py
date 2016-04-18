@@ -17,11 +17,16 @@ class IntLife:
         self._board = {self._cells[i] for i, b in enumerate(reversed(bin(self.seed)[2:])) if int(b)}
 
     def __iter__(self):
-        count = 0
-        while count < self.generations:
-            self.advance()
-            yield self.int
-            count += 1
+        if self.generations is None:
+            while True:
+                self.advance()
+                yield self.int
+        else:
+            count = 0
+            while count < self.generations:
+                self.advance()
+                yield self.int
+                count += 1
 
     def __next__(self):
         self.advance()
