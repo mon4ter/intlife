@@ -5,36 +5,31 @@ DEFAULT_SIZE = 8
 
 class IntLife:
     def __init__(self, seed, *, generations, size):
-        self.seed = seed
-        self.generations = generations
         self.size = size
-
-        self._neigh = {(i, j) for i in range(-1, 2) for j in range(-1, 2)}
         self._cells = None
-        self.cells()
-        self._board = {self._cells[i] for i, b in enumerate(reversed(bin(self.seed)[2:])) if int(b)}
+        self._make_cells()
+
+        try:
+            self._board = set(seed)
+        except TypeError:
+            self._board = {self._cells[i] for i, b in enumerate(reversed(bin(seed)[2:])) if int(b)}
+
+        self.generations = generations
+        self._neigh = {(i, j) for i in range(-1, 2) for j in range(-1, 2)}
 
     def __iter__(self):
         if self.generations is None:
             while True:
-                self.advance()
+                self._advance()
                 yield self.int
         else:
             count = 0
             while count < self.generations:
-                self.advance()
+                self._advance()
                 yield self.int
                 count += 1
 
-    @property
-    def board(self):
-        return self._board
-
-    @board.setter
-    def board(self, value):
-        self._board = set(value)
-
-    def cells(self):
+    def _make_cells(self):
         cells = {}
         index = 0
 
@@ -57,7 +52,7 @@ class IntLife:
 
         self._cells = cells
 
-    def neighbours(self, point):
+    def _neighbours(self, point):
         x, y = point
         size = self.size
 
@@ -77,21 +72,26 @@ class IntLife:
 
             yield xi, yj
 
-    @property
-    def int(self):
-        return sum(2**self._cells[p] for p in self._board)
-
-    def advance(self):
+    def _advance(self):
         board = self._board
         new_board = set()
+        neighbours = self._neighbours
 
-        for point in (n for p in board for n in self.neighbours(p)):
-            alive_neigh = sum(1 for neigh in self.neighbours(point) if neigh in board)
+        for point in (n for p in board for n in neighbours(p)):
+            alive_neigh = sum(1 for neigh in neighbours(point) if neigh in board)
 
             if alive_neigh == 3 or (alive_neigh == 4 and point in board):
                 new_board.add(point)
 
         self._board = new_board
+
+    @property
+    def int(self):
+        return sum(2 ** self._cells[p] for p in self._board)
+
+    @property
+    def board(self):
+        return self._board
 
 
 def intlife(seed, generations=None, size=DEFAULT_SIZE):
@@ -103,6 +103,5 @@ def boardify(number, size=DEFAULT_SIZE):
 
 
 def intify(board, size=DEFAULT_SIZE):
-    il = IntLife(0, generations=0, size=size)
-    il.board = board
-    return il.int
+    return IntLife(board, generations=0, size=size).int
+
