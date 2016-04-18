@@ -48,8 +48,18 @@ GLIDER = [
 ]
 
 
-@pytest.mark.parametrize("seed,number,generations", zip(repeat(GLIDER[-1]), GLIDER, count()))
+@pytest.mark.parametrize("seed,number,generations", zip(repeat(GLIDER[-1]), GLIDER, count(1)))
 def test_glider(seed, number, generations):
-    for index, result in enumerate(intlife.intlife(seed, generations=generations)):
-        if index == generations:
-            assert result == number
+    result = None
+
+    for result in intlife.intlife(seed, generations=generations):
+        pass
+
+    assert result == number
+
+
+def test_iterator():
+    iterator = intlife.intlife(15)
+
+    for index in range(100):
+        assert next(iterator) == 15
