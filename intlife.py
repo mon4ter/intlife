@@ -1,10 +1,22 @@
+"""Conway's Game of Life using Integers.
 
+"""
 
 DEFAULT_SIZE = 8
 
 
 class IntLife:
+    """Base intlife generator class
+
+    """
+
+    _NEIGH = {(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 0), (0, 1), (1, -1), (1, 0), (1, 1)}
+
     def __init__(self, seed, *, generations, size):
+        """Initialize an instance.
+
+        """
+
         self.size = size
         self._cells = None
         self._make_cells()
@@ -15,13 +27,16 @@ class IntLife:
             self._board = frozenset(seed)
 
         self.generations = generations
-        self._neigh = frozenset((i, j) for i in range(-1, 2) for j in range(-1, 2))
 
         self._neigh_cache = {}
         self._board_cache = {}
         self._int_cache = {}
 
     def __iter__(self):
+        """Python generator magic method.
+
+        """
+
         if self.generations is None:
             while True:
                 self._advance()
@@ -34,6 +49,10 @@ class IntLife:
                 count += 1
 
     def _make_cells(self):
+        """Initialize game cells for index lookup.
+
+        """
+
         cells = {}
         index = 0
 
@@ -57,6 +76,10 @@ class IntLife:
         self._cells = cells
 
     def _neighbours(self, point):
+        """Return set of surrounding points of given point.
+
+        """
+
         cache = self._neigh_cache
 
         if point in cache:
@@ -64,9 +87,9 @@ class IntLife:
         else:
             x, y = point
             size = self.size
-            point_neigh = set()
+            neigh = set()
 
-            for i, j in self._neigh:
+            for i, j in self._NEIGH:
                 xi = x + i
                 yj = y + j
 
@@ -80,34 +103,41 @@ class IntLife:
                 elif yj >= size:
                     yj -= size
 
-                point_neigh.add((xi, yj))
+                neigh.add((xi, yj))
 
-            point_neigh = frozenset(point_neigh)
-            cache[point] = point_neigh
-            return point_neigh
+            neighbours = frozenset(neigh)
+            cache[point] = neighbours
+            return neighbours
 
     def _advance(self):
+        """Calculate a new generation.
+
+        """
+
         board = self._board
         cache = self._board_cache
 
         if board in cache:
             self._board = cache[board]
         else:
-            new_board = set()
+            temp = set()
             neighbours = self._neighbours
 
             for point in {n for p in board for n in neighbours(p)}:
                 alive_neigh = len(board & neighbours(point))
 
                 if alive_neigh == 3 or (alive_neigh == 4 and point in board):
-                    new_board.add(point)
+                    temp.add(point)
 
-            new_board = frozenset(new_board)
+            new_board = frozenset(temp)
             cache[board] = new_board
             self._board = new_board
 
     @property
     def int(self):
+        """Return integer representation of the current generation.
+
+        """
         cache = self._int_cache
         board = self._board
 
@@ -121,16 +151,20 @@ class IntLife:
 
     @property
     def board(self):
-        return self._board
+        """Return set of points of the current generation."""
+        return self._board.copy()
 
 
 def intlife(seed, generations=None, size=DEFAULT_SIZE):
+    """Wrapper for 'for .. in ..' statements."""
     yield from IntLife(seed, generations=generations, size=size)
 
 
 def boardify(number, size=DEFAULT_SIZE):
+    """Convert integer to set of points."""
     return IntLife(number, generations=0, size=size).board
 
 
 def intify(board, size=DEFAULT_SIZE):
+    """Convert sequence of points to integer."""
     return IntLife(board, generations=0, size=size).int
