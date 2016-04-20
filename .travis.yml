@@ -11,5 +11,6 @@ script:
   - "py.test --cov=./"
 after_success:
   - "pylint intlife"
+  - "codecov"
   - "coveralls"
   - "coverage xml && python-codacy-coverage -r coverage.xml"
