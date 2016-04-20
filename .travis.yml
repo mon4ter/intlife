@@ -7,7 +7,7 @@ python:
   - "3.5-dev"
   - "pypy"
 before_install:
-  - "travis_retry pip install codecov coveralls codacy-coverage pytest pytest-cov pylint"
+  - "pip install codecov coveralls codacy-coverage pytest pytest-cov pylint"
 install:
   - |
       if [ "$TRAVIS_PYTHON_VERSION" = "pypy" ]; then
@@ -22,6 +22,10 @@ install:
         virtualenv --python="$PYENV_ROOT/versions/pypy-$PYPY_VERSION/bin/python" "$HOME/virtualenvs/pypy-$PYPY_VERSION"
         source "$HOME/virtualenvs/pypy-$PYPY_VERSION/bin/activate"
       fi
+cache:
+  directories:
+    - $HOME/.cache/pip
+    - $HOME/.pyenv
 script:
   - "py.test --cov=./"
 after_success:
